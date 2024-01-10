@@ -6,7 +6,7 @@ from functools import partial
 import datasets
 import torch
 from torch.utils.tensorboard import SummaryWriter
-import wandb
+# import wandb
 from transformers import (
     AutoTokenizer,
     AutoModel,
@@ -30,8 +30,8 @@ from utils import *
 
 
 # Replace with your own api_key and project name
-os.environ['WANDB_API_KEY'] = 'ecf1e5e4f47441d46822d38a3249d62e8fc94db4'
-os.environ['WANDB_PROJECT'] = 'fingpt-benchmark'
+os.environ['WANDB_API_KEY'] = '5feaffa81617ab258aaf865c2b5167288434f546'
+os.environ['WANDB_PROJECT'] = 'fingpt-sentiment-benchmark'
 
 
 def main(args):
@@ -43,11 +43,10 @@ def main(args):
 
     # Parse the model name and determine if it should be fetched from a remote source
     model_name = parse_model_name(args.base_model, args.from_remote)
-    
     # Load the pre-trained causal language model
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        # load_in_8bit=True,
+        load_in_8bit=True,
         # device_map="auto",
         trust_remote_code=True
     )
@@ -113,7 +112,7 @@ def main(args):
         evaluation_strategy=args.evaluation_strategy,
         load_best_model_at_end=args.load_best_model,
         remove_unused_columns=False,
-        report_to='wandb',
+        # report_to='wandb',
         run_name=args.run_name
     )
     if not args.base_model == 'mpt':
@@ -124,7 +123,7 @@ def main(args):
     model.config.use_cache = (
         False
     )
-    # model = prepare_model_for_int8_training(model
+    model = prepare_model_for_int8_training(model)
 
     # setup peft for lora
     peft_config = LoraConfig(
@@ -192,7 +191,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Login to Weights and Biases
-    wandb.login()
+    # wandb.login()
 
     # Run the main function
     main(args)
